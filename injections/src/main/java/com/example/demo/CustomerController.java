@@ -22,7 +22,7 @@ public class CustomerController {
     private EntityManager entityManager;
 
     @GetMapping("/search")
-    public List<Customer> search(@RequestParam String name) {
+    public List<Customer> unsecureSearch(@RequestParam String name) {
         String sql = "SELECT u FROM Customer u WHERE u.name = '" + name + "'";
         Query query = entityManager.createQuery(sql);
         return query.getResultList();
@@ -46,7 +46,7 @@ public class CustomerController {
     public void addingTestDataToTheDb(){
         for (int i = 1; i <= 5; i++) {
             Customer customer =new Customer((long) i,"user"+i,"passwordOfUserNumber"+i);
-            Customer save = customerRepository.save(customer);
+            customerRepository.save(customer);
         }
     }
 }

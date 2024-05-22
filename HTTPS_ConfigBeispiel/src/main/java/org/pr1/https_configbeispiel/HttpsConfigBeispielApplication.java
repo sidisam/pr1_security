@@ -1,11 +1,13 @@
-package com.example.demo;
+package org.pr1.https_configbeispiel;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SqlInjectionApplication {
+public class HttpsConfigBeispielApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(SqlInjectionApplication.class, args);
+        SpringApplication.run(HttpsConfigBeispielApplication.class, args);
     }
+
 }
