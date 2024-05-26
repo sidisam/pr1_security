@@ -13,10 +13,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -35,6 +38,7 @@ import java.security.interfaces.RSAPublicKey;
 @Component
 @RequiredArgsConstructor
 @EnableWebSecurity
+@EnableMethodSecurity
 public class BeanConfigs {
     @Value("${rsa.privatKey}")
     private RSAPrivateKey privatKey;
@@ -42,9 +46,13 @@ public class BeanConfigs {
     private RSAPublicKey publicKey;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtDecoder jwtDecoder, UserDetailsService userDetailsService) throws Exception {
         http.authorizeHttpRequests(httpRequest -> httpRequest.anyRequest().permitAll());
         http.csrf(AbstractHttpConfigurer::disable);
+        http.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer((oauth2) -> oauth2.jwt((jwt) -> jwt.decoder(jwtDecoder)))
+                .userDetailsService(userDetailsService)
+                .httpBasic(Customizer.withDefaults());
         http.cors(AbstractHttpConfigurer::disable);
         return http.build();
     }
@@ -59,7 +67,7 @@ public class BeanConfigs {
         return new InMemoryUserDetailsManager(
                 User
                         .withUsername("sidi")
-                        .password(passwordEncoder.encode("abcd")).authorities("USER","ADMIN")
+                        .password(passwordEncoder.encode("abcd")).authorities("USER", "ADMIN")
                         .build()
         );
     }
