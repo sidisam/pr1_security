@@ -29,7 +29,11 @@ public class JWTController {
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<LoginResponseDTO> logout(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO) {
-        return null;
+    public ResponseEntity<Optional<LoginResponseDTO>> refreshToken(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO) {
+        Optional<LoginResponseDTO> login = jwtService.generateTokenThrowRefreshToken(refreshTokenRequestDTO);
+        if (login.isEmpty()) {
+            return new ResponseEntity<>(login, HttpStatus.UNAUTHORIZED);
+        }
+        return ResponseEntity.ok(login);
     }
 }

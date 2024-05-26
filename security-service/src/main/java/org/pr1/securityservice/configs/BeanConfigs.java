@@ -21,7 +21,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
@@ -57,9 +59,8 @@ public class BeanConfigs {
         return new InMemoryUserDetailsManager(
                 User
                         .withUsername("sidi")
-                        .password(
-                                passwordEncoder.encode("abcd")
-                        ).build()
+                        .password(passwordEncoder.encode("abcd")).authorities("USER","ADMIN")
+                        .build()
         );
     }
 
@@ -68,6 +69,11 @@ public class BeanConfigs {
         JWK jwk = new RSAKey.Builder(publicKey).privateKey(privatKey).build();
         JWKSource<SecurityContext> jwkSource = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwkSource);
+    }
+
+    @Bean
+    JwtDecoder jwtDecoder() {
+        return NimbusJwtDecoder.withPublicKey(publicKey).build();
     }
 
     @Bean
