@@ -12,7 +12,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -33,7 +32,7 @@ public class JWTService {
     private final AuthenticationManager authenticationManager;
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
-    private final UserDetailsService userDetailsService;
+    private final UserService userService;
 
     public Optional<LoginResponseDTO> login(LoginRequestDTO loginRequestDTO) {
         Authentication authenticate;
@@ -53,7 +52,6 @@ public class JWTService {
 
     public LoginResponseDTO generateTokens(String subject, String scope) {
         LoginResponseDTO loginResponseDTO = new LoginResponseDTO();
-
         Instant instant = Instant.now();
         JwtClaimsSet jwtClaimsSetForIdToken = generateJwtClaim(subject, instant, scope, 1, true);
         JwtClaimsSet jwtClaimsSetForRefreshToken = generateJwtClaim(subject, instant, scope, 60, false);
@@ -88,7 +86,7 @@ public class JWTService {
             return Optional.empty();
         }
         String subject = decoded.getSubject();
-        UserDetails userDetails = userDetailsService.loadUserByUsername(subject);
+        UserDetails userDetails = userService.loadUserByUsername(subject);
         String scope = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(" "));

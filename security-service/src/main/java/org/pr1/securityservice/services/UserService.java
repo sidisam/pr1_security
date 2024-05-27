@@ -2,6 +2,8 @@ package org.pr1.securityservice.services;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.pr1.securityservice.DTOs.UserRequestDTO;
+import org.pr1.securityservice.DTOs.UserResponseDTO;
 import org.pr1.securityservice.entities.User;
 import org.pr1.securityservice.entities.UserRole;
 import org.pr1.securityservice.repositories.UserRepository;
@@ -12,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,11 +43,19 @@ public class UserService implements UserDetailsService {
         User user = User.builder()
                .role(List.of(UserRole.USER,UserRole.ADMIN))
                 .username("testuser")
+                .emailAddress("test@test.com")
                 .password(passwordEncoder.encode("test"))
                 .isEnabled(true)
                 .build();
-        User save = userRepository.save(user);
-        System.out.println(save);
+         userRepository.save(user);
     }
 
+    public Optional<UserResponseDTO> createUser(UserRequestDTO userRequestDTO) {
+        //check PA
+        return  null;
+    }
+
+    public Optional<UserResponseDTO> updateUser(UserRequestDTO userRequestDTO) {
+        return null;
+    }
 }

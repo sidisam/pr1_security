@@ -1,6 +1,7 @@
 package org.pr1.securityservice.entities;
 
 import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -31,10 +32,13 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class User implements UserDetails {
-    @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(unique = true, nullable = false)
     private String username;
     private String password;
+    @Column(unique = true, nullable = false)
     private String emailAddress;
     private boolean accountActivated;
     private String address;

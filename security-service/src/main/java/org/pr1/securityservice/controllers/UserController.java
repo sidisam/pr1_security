@@ -1,24 +1,31 @@
 package org.pr1.securityservice.controllers;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
+import lombok.RequiredArgsConstructor;
+import org.pr1.securityservice.DTOs.UserRequestDTO;
+import org.pr1.securityservice.DTOs.UserResponseDTO;
+import org.pr1.securityservice.services.UserService;
+import org.springframework.http.ResponseEntity;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+import java.util.Optional;
+
+@RestController("/user")
 @SecurityRequirement(name = "bearerAuth")
+@RequiredArgsConstructor
 public class UserController {
-    @GetMapping("/test")
-    @PreAuthorize("hasAnyAuthority('SCOPE_MANAGER')")
-    public String getTestDAta(){
-        System.out.println(SecurityContextHolder.getContext().getAuthentication());
-        return "User is successfully logged in";
+    private final UserService userService;
+
+    @PostMapping()
+    public ResponseEntity<Optional<UserResponseDTO>> createUser(@RequestBody UserRequestDTO userRequestDTO) {
+        return ResponseEntity.ok(userService.createUser(userRequestDTO));
     }
-    @GetMapping("/test2")
-    @PreAuthorize("hasAnyAuthority('SCOPE_USER')")
-    public String getTestDAta2(){
-        System.out.println(SecurityContextHolder.getContext().getAuthentication());
-        return "User is successfully logged in";
+    @PostMapping()
+    public ResponseEntity<Optional<UserResponseDTO>> updateUser(@RequestBody UserRequestDTO userRequestDTO) {
+        return ResponseEntity.ok(userService.updateUser(userRequestDTO));
     }
+
 }
