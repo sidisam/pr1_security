@@ -15,5 +15,10 @@ public class UserController {
         System.out.println(SecurityContextHolder.getContext().getAuthentication());
         return "User is successfully logged in";
     }
-
+    @GetMapping("/test2")
+    @PreAuthorize("hasAnyAuthority('SCOPE_USER')")
+    public String getTestDAta2(){
+        System.out.println(SecurityContextHolder.getContext().getAuthentication());
+        return "User is successfully logged in";
+    }
 }

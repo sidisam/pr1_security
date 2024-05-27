@@ -8,6 +8,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
+import org.pr1.securityservice.services.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,15 +21,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.stereotype.Component;
 
@@ -46,12 +44,12 @@ public class BeanConfigs {
     private RSAPublicKey publicKey;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtDecoder jwtDecoder, UserDetailsService userDetailsService) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtDecoder jwtDecoder, UserService userService) throws Exception {
         http.authorizeHttpRequests(httpRequest -> httpRequest.anyRequest().permitAll());
         http.csrf(AbstractHttpConfigurer::disable);
         http.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt((jwt) -> jwt.decoder(jwtDecoder)))
-                .userDetailsService(userDetailsService)
+                .userDetailsService(userService)
                 .httpBasic(Customizer.withDefaults());
         http.cors(AbstractHttpConfigurer::disable);
         return http.build();
@@ -62,15 +60,15 @@ public class BeanConfigs {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public UserDetailsService inMemoryUserDetailsManager(PasswordEncoder passwordEncoder) {
-        return new InMemoryUserDetailsManager(
-                User
-                        .withUsername("sidi")
-                        .password(passwordEncoder.encode("abcd")).authorities("USER", "ADMIN")
-                        .build()
-        );
-    }
+//    @Bean
+//    public UserDetailsService inMemoryUserDetailsManager(PasswordEncoder passwordEncoder) {
+//        return new InMemoryUserDetailsManager(
+//                User
+//                        .withUsername("sidi")
+//                        .password(passwordEncoder.encode("abcd")).authorities("USER", "ADMIN")
+//                        .build()
+//        );
+//    }
 
     @Bean
     public JwtEncoder jwtEncoder() {
@@ -84,10 +82,10 @@ public class BeanConfigs {
         return NimbusJwtDecoder.withPublicKey(publicKey).build();
     }
     @Bean
-    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+    public AuthenticationManager authenticationManager(UserService userService, PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setPasswordEncoder(passwordEncoder);
-        authenticationProvider.setUserDetailsService(userDetailsService);
+        authenticationProvider.setUserDetailsService(userService);
         return new ProviderManager(authenticationProvider);
     }
 }
