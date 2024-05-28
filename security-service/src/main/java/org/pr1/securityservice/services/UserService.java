@@ -2,14 +2,14 @@ package org.pr1.securityservice.services;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.pr1.securityservice.DTOs.UserRequestDTO;
 import org.pr1.securityservice.DTOs.UserResponseDTO;
+import org.pr1.securityservice.DTOs.UserUpdateDTO;
 import org.pr1.securityservice.entities.User;
 import org.pr1.securityservice.entities.UserRole;
 import org.pr1.securityservice.mappers.UserMapper;
 import org.pr1.securityservice.repositories.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,8 +23,8 @@ import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService implements UserDetailsService {
-    private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
@@ -49,8 +49,7 @@ public class UserService implements UserDetailsService {
 
     public Optional<UserResponseDTO> createUser(UserRequestDTO userRequestDTO) {
         if (userRequestDTO == null || userRequestDTO.getUsername() == null
-                || userRequestDTO.getEmailAddress() == null
-                || userRequestDTO.getPassword() == null) {
+                || userRequestDTO.getEmailAddress() == null || userRequestDTO.getUsername().isBlank() || userRequestDTO.getEmailAddress().isBlank()) {
             throw new IllegalArgumentException("Invalid input");
         }
         if (!passwordIsValid(userRequestDTO.getPassword())) {
@@ -66,9 +65,22 @@ public class UserService implements UserDetailsService {
         return Optional.of(userResponseDTO);
     }
 
-    public Optional<UserResponseDTO> updateUser(UserRequestDTO userRequestDTO) {
-        return null;
+    public Optional<UserResponseDTO> updateUser(UserUpdateDTO userUpdateDTO) {
+        User user = userRepository.findById(userUpdateDTO.getId()).orElseThrow(() -> new UsernameNotFoundException("user with the Id: " + userUpdateDTO.getId() + " was not found"));
+        user.setRole(userUpdateDTO.getRole());
+        user.setEnabled(userUpdateDTO.isEnabled());
+        user.setUsername(userUpdateDTO.getUsername());
+        user.setEmailAddress(userUpdateDTO.getEmailAddress());
+        user.setAddress(userUpdateDTO.getAddress());
+        User saved = userRepository.save(user);
+        log.info("Saved user: {}", saved);
+        return Optional.of(userMapper.mapUserToUserResponseDTO(saved));
     }
+
+    public void deleteUser(Long userId) {
+        this.userRepository.deleteById(userId);
+    }
+
 
     public boolean passwordIsValid(String password) {
         if (password == null) {
@@ -81,5 +93,20 @@ public class UserService implements UserDetailsService {
         Pattern p = Pattern.compile(regex);
         Matcher matcher = p.matcher(password);
         return matcher.matches();
+    }
+
+    public Optional<UserResponseDTO> getUserById(Long userId) {
+        return Optional.of(
+                userMapper.mapUserToUserResponseDTO(userRepository.findById(userId)
+                        .orElseThrow(() -> new UsernameNotFoundException("user with the Id: " + userId + " was not found")))
+        );
+    }
+
+    public Optional<List<UserResponseDTO>> findAll() {
+        return Optional.of(
+                userRepository.findAll().stream().map(
+                        userMapper::mapUserToUserResponseDTO
+                ).toList()
+        );
     }
 }

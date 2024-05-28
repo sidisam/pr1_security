@@ -61,16 +61,6 @@ public class BeanConfigs {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public UserDetailsService inMemoryUserDetailsManager(PasswordEncoder passwordEncoder) {
-//        return new InMemoryUserDetailsManager(
-//                User
-//                        .withUsername("sidi")
-//                        .password(passwordEncoder.encode("abcd")).authorities("USER", "ADMIN")
-//                        .build()
-//        );
-//    }
-
     @Bean
     public JwtEncoder jwtEncoder() {
         JWK jwk = new RSAKey.Builder(publicKey).privateKey(privatKey).build();
