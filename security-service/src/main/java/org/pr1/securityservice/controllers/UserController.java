@@ -8,13 +8,14 @@ import org.pr1.securityservice.services.UserService;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
 @RestController("/user")
-@SecurityRequirement(name = "bearerAuth")
+//@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
@@ -23,7 +24,7 @@ public class UserController {
     public ResponseEntity<Optional<UserResponseDTO>> createUser(@RequestBody UserRequestDTO userRequestDTO) {
         return ResponseEntity.ok(userService.createUser(userRequestDTO));
     }
-    @PostMapping()
+    @PutMapping()
     public ResponseEntity<Optional<UserResponseDTO>> updateUser(@RequestBody UserRequestDTO userRequestDTO) {
         return ResponseEntity.ok(userService.updateUser(userRequestDTO));
     }
