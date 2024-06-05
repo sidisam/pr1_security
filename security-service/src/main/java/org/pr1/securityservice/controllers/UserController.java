@@ -9,6 +9,7 @@ import org.pr1.securityservice.DTOs.UserUpdateDTO;
 import org.pr1.securityservice.services.UserService;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,23 +30,25 @@ public class UserController {
     public ResponseEntity<Optional<UserResponseDTO> > getUserById(@PathVariable Long userId){
         return ResponseEntity.ok(userService.getUserById(userId));
     }
-    @GetMapping()
+    @GetMapping("/user/all")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Optional<List<UserResponseDTO>>> getAllUsers(){
         return ResponseEntity.ok(userService.findAll());
     }
-    @PostMapping()
+    @PostMapping("/user")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Optional<UserResponseDTO>> createUser(@RequestBody UserRequestDTO userRequestDTO) {
         return ResponseEntity.ok(userService.createUser(userRequestDTO));
     }
-    @PutMapping()
-    public ResponseEntity<Optional<UserResponseDTO>> updateUser(@RequestBody UserUpdateDTO userRequestDTO) {
-        return ResponseEntity.ok(userService.updateUser(userRequestDTO));
+    @PutMapping("/user")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN') || principal.claim.get('id')==#userUpdateDTO.id")
+    public ResponseEntity<Optional<UserResponseDTO>> updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
+        return ResponseEntity.ok(userService.updateUser(userUpdateDTO));
     }
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/user/{userId}")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN') || principal.claim.get('id')==#userId")
     public ResponseEntity<Void> delete(@PathVariable Long userId){
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
     }
-
-
 }
